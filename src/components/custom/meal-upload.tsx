@@ -26,9 +26,6 @@ export default function MealUpload({ onAnalysisComplete }: MealUploadProps) {
     // Analyze image
     setIsAnalyzing(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
       // Convert to base64 for OpenAI
       const base64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -42,14 +39,24 @@ export default function MealUpload({ onAnalysisComplete }: MealUploadProps) {
         body: JSON.stringify({ imageUrl: base64 }),
       });
 
-      if (!response.ok) throw new Error('Failed to analyze meal');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to analyze meal');
+      }
 
       const analysis = await response.json();
+      
+      // Validar se a resposta tem os campos necessários
+      if (!analysis.foods || !Array.isArray(analysis.foods)) {
+        throw new Error('Resposta inválida da API');
+      }
+
       onAnalysisComplete({ ...analysis, imageUrl: base64 });
       setPreview(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing meal:', error);
-      alert('Erro ao analisar refeição. Tente novamente.');
+      alert(`Erro ao analisar refeição: ${error.message || 'Tente novamente.'}`);
+      setPreview(null);
     } finally {
       setIsAnalyzing(false);
     }

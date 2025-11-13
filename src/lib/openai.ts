@@ -16,7 +16,7 @@ export async function analyzeMealImage(imageUrl: string) {
       throw new Error('URL da imagem inválida');
     }
 
-    console.log('🔍 Analisando imagem:', imageUrl);
+    console.log('🔍 Analisando imagem com OpenAI...');
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',

@@ -14,13 +14,12 @@ export async function GET(request: NextRequest) {
     }
 
     const meals = await getMeals(userId, date || undefined);
-    return NextResponse.json(meals);
+    // Garantir que sempre retorna um array
+    return NextResponse.json(Array.isArray(meals) ? meals : []);
   } catch (error: any) {
     console.error('Error fetching meals:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch meals' },
-      { status: 500 }
-    );
+    // Retornar array vazio em caso de erro para evitar quebrar o frontend
+    return NextResponse.json([]);
   }
 }
 
